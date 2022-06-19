@@ -20,8 +20,8 @@ const passwordReducer = (state, action) => {
   if (action.type === 'PSWD_INPUT') {
     return { value: action.val, isValid: action.val.trim().length > 6 }
   }
-  if (action.tpe === 'INPUT_BLUR') {
-    return { value: state.value, isValid: state.val.trim().length > 6 }
+  if (action.type === 'PSWD_BLUR') {
+    return { value: state.value, isValid: state.value.trim().length > 6 }
   }
   return { value: '', isValid: false }
 
@@ -32,11 +32,11 @@ const Login = (props) => {
   const [formIsValid, setFormIsValid] = useState(false);
   const [emailState, dispatchEmail] = useReducer(emailReducer, {
     value: '',
-    isValid: false,
+    isValid: null,
   });
   const [passWordState, dispatchPassword] = useReducer(passwordReducer, {
     value: '',
-    isValid: false
+    isValid: null,
   });
 
   const emailChangeHandler = (event) => {
@@ -44,9 +44,6 @@ const Login = (props) => {
       type: 'USER_INPUT',
       val: event.target.value
     });
-    setFormIsValid(
-      emailState.isValid && passWordState.isValid
-    )
   };
 
   const passwordChangeHandler = (event) => {
@@ -55,10 +52,23 @@ const Login = (props) => {
       val: event.target.value
     });
 
-    setFormIsValid(
-      emailState.isValid && passWordState.isValid
-    )
   };
+  const { isValid: emailIsValid } = emailState;
+  const { isValid: passordIsValid } = passWordState;
+
+  useEffect(() => {
+    const identifier = setTimeout(() => {
+      console.log('Checking from validity');
+      setFormIsValid( emailIsValid&& passordIsValid);
+    }, 500);
+    // CleanUp function runs before the side Effect fucntion, expect the first time.
+    return () => {
+      //  this timer set the time value to the null;
+      clearTimeout(identifier)
+      console.log('CleanUp !')
+    };
+
+  }, [emailIsValid, passordIsValid]);
 
   const validateEmailHandler = () => {
     dispatchEmail({ type: 'INPUT_BLUR', })
